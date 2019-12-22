@@ -1,9 +1,13 @@
 package com.borischistov;
 
-import io.helidon.common.http.Http;
+import io.helidon.config.Config;
+import io.helidon.config.ConfigSources;
+import io.helidon.config.PollingStrategies;
 import io.helidon.webserver.Routing;
 import io.helidon.webserver.ServerConfiguration;
 import io.helidon.webserver.WebServer;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.slf4j.bridge.SLF4JBridgeHandler;
 
 import java.util.concurrent.ExecutionException;
@@ -19,20 +23,42 @@ public class HelidonApplication {
         SLF4JBridgeHandler.install();
     }
 
+    private static final Logger logger = LoggerFactory.getLogger(HelidonApplication.class);
+
     public static void main(String[] args) throws InterruptedException, ExecutionException, TimeoutException {
-        var serverConfiguration = ServerConfiguration.builder().port(9000).build();
-        WebServer
+        var config = Config
+                .builder()
+                .sources(
+                        ConfigSources
+                                .classpath("application.yaml")
+                                .pollingStrategy(PollingStrategies::nop),
+                        ConfigSources
+                                .file("conf/application.yaml")
+                                .pollingStrategy(PollingStrategies::watch)
+                                .optional()
+                )
+                .build();
+        var serverConfig = config.get("server");
+        var appConfig = config.get("app");
+
+        var serverConfiguration = ServerConfiguration.builder(serverConfig).build();
+        var ws = WebServer
                 .create(
                         serverConfiguration,
-                        () -> Routing
-                                .builder()
-                                .any((req, resp) -> resp
-                                        .status(Http.Status.OK_200)
-                                        .send("Welcome from helidon"))
-                                .build()
+                        () -> Routing.builder().any(new StubHandler(appConfig)).build()
                 )
                 .start()
                 .toCompletableFuture()
-                .get(2, TimeUnit.SECONDS);
+                .get(
+                    2,
+                    TimeUnit.SECONDS
+                );
+
+        logger.info(
+                "Server started, address: http://localhost:{}",
+                ws.port()
+        );
     }
+
+
 }
