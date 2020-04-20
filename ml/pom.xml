@@ -15,6 +15,7 @@
     <modules>
         <module>cosine-similarity</module>
         <module>function-approximation</module>
+        <module>linear-regression</module>
     </modules>
 
 </project>
