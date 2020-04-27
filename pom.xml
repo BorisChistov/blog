@@ -11,6 +11,7 @@
     <modules>
         <module>mq-manager</module>
         <module>helidon</module>
+        <module>ml</module>
     </modules>
 
     <build>
