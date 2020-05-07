@@ -1,0 +1,9 @@
+server:
+    port: 9090
+app:
+    notFound:
+        code: 404
+        content-type: 'application/json'
+        body: '{
+                "data" : "route not found"
+            }'
