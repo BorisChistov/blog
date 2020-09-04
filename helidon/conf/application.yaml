@@ -5,16 +5,27 @@ app:
         body: '{
                 "data" : "route not found"
             }'
+    token:
+        mathod: get
+        path: /token
+        key-id: blog-app
+        subject: test@gmail.com
+        roles: [TEST, USER]
+        expire: 1d
     routes:
         /test3:
             code: 200
             content-type: 'application/json'
+            authenticate: true
+            authorize: true
+            roles: [ADMIN, USER]
             body: '{
                 "token" : "data for test1"
             }'
         /test4:
             code: 200
             content-type: 'application/json'
+            authenticate: false
             body: '{
                 "data" : "data for test2"
             }'
